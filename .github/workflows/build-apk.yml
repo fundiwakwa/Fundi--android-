@@ -1,5 +1,5 @@
 
-name: Inspect Fundi Android Configuration
+name: Build Fundi Android APK
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  inspect:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,8 +23,54 @@ jobs:
           cp project/settings.gradle .
           cp project/gradle.properties .
 
-      - name: Show Android Gradle configuration
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Fix Android Java and Kotlin settings
         run: |
-          echo "===== APP BUILD.GRADLE ====="
-          cat app/build.gradle
-          echo "===== END CONFIGURATION ====="
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+              id 'org.jetbrains.kotlin.android'
+          }
+
+          android {
+              namespace 'com.fundi.app'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId 'com.fundi.app'
+                  minSdk 23
+                  targetSdk 35
+                  versionCode 1
+                  versionName '1.0.0'
+              }
+
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+
+          kotlinOptions {
+              jvmTarget = '17'
+          }
+          EOF
+
+      - name: Build APK
+        run: gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Fundi-Android-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          
