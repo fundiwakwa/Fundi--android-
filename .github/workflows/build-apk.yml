@@ -1,5 +1,5 @@
 
-name: Build Fundi Android APK
+name: Inspect Fundi Android Configuration
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  inspect:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,35 +23,8 @@ jobs:
           cp project/settings.gradle .
           cp project/gradle.properties .
 
-      - name: Set up Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
-
-      - name: Force Java compiler to version 17
+      - name: Show Android Gradle configuration
         run: |
-          cat >> app/build.gradle <<'EOF'
-
-          android {
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
-              }
-          }
-          EOF
-
-      - name: Build APK
-        run: gradle assembleDebug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Fundi-Android-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
-          
+          echo "===== APP BUILD.GRADLE ====="
+          cat app/build.gradle
+          echo "===== END CONFIGURATION ====="
