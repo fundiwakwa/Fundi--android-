@@ -34,7 +34,7 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Fix Android Java and Kotlin settings
+      - name: Configure Android Java compatibility
         run: |
           cat > app/build.gradle <<'EOF'
           plugins {
@@ -59,11 +59,10 @@ jobs:
                   targetCompatibility JavaVersion.VERSION_17
               }
           }
-
-          kotlinOptions {
-              jvmTarget = '17'
-          }
           EOF
+
+      - name: Verify Java compatibility
+        run: cat app/build.gradle
 
       - name: Build APK
         run: gradle assembleDebug
