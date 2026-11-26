@@ -10,6 +10,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,7 +36,8 @@ jobs:
 
       - name: Align Java and Kotlin targets
         run: |
-          sed -i '/compileOptions {/a\        sourceCompatibility JavaVersion.VERSION_17\n        targetCompatibility JavaVersion.VERSION_17' app/build.gradle
+          sed -i 's/VERSION_1_8/VERSION_17/g' app/build.gradle
+          sed -i 's/"1.8"/"17"/g' app/build.gradle
 
       - name: Build APK
         run: gradle assembleDebug
